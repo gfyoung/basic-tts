@@ -1,10 +1,15 @@
-if (!(window && window.speechSynthesis)) {
-    throw "Text-to-speech is not defined!";
-}
+const tts = (() => {
+    const isSupported = () => (
+        (typeof(window) !== "undefined" && "speechSynthesis" in window
+            && "SpeechSynthesisUtterance" in window)
+    );
 
-window.speechSynthesis.onvoiceschanged = () => {
     class Speaker {
         constructor(props) {
+            if (!isSupported()) {
+                throw "Text-to-speech is not defined!";
+            }
+
             this._props = props || {};
             this._speaker = window.speechSynthesis;
         }
@@ -49,28 +54,18 @@ window.speechSynthesis.onvoiceschanged = () => {
                 self._speaker.speak(utterance);
             });
         }
-    };
+    }
 
-    const speak = () => {
-        const speaker = new Speaker({
-            voice: "Google US English",
-            lang: "en-US",
-            volume: 1,
-            pitch: 1,
-            rate: 1
-        });
+    const createSpeaker = (props) => (
+        new Speaker(props)
+    );
 
-        speaker.speak("Hello! This is text to speech").then(() => {
-            console.log("The speaker has spoken!");
-        }).catch(() => {
-            console.log("Sigh...the speaker did not speak :(");
-        });
-    };
+    return {
+        isSupported,
+        createSpeaker,
+    }
+})();
 
-    const button = document.getElementById("activate");
-    button.onclick = speak;
-
-    console.log("READY!");
-    console.log(window.speechSynthesis.getVoices());
-    window.speechSynthesis.onvoiceschanged = () => {};
-};
+if (typeof(module) !== "undefined") {
+    module.exports = tts;
+}
