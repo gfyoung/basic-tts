@@ -4,10 +4,34 @@ const tts = (() => {
             && "SpeechSynthesisUtterance" in window)
     );
 
+    const rejectWithMsg = (reject, msg) => {
+        reject({ msg });
+    }
+
+    const checkVoices = () => {
+        return new Promise((resolve, reject) => {
+            if (!isSupported()) {
+                rejectWithMsg(reject, "Text-to-speech is not supported!");
+            }
+
+            setTimeout(() => {
+                const voices = speechSynthesis.getVoices();
+
+                if (voices.length === 0) {
+                    rejectWithMsg(reject, "No voices available for use.");
+                } else {
+                    resolve({
+                        voices
+                    });
+                }
+            }, 100);
+        })
+    };
+
     class Speaker {
         constructor(props) {
             if (!isSupported()) {
-                throw "Text-to-speech is not defined!";
+                throw "Text-to-speech is not supported!";
             }
 
             this._props = props || {};
@@ -34,7 +58,7 @@ const tts = (() => {
                 }
 
                 if (speakerVoice === undefined) {
-                    throw `No voice found with voice: ${propVoice}`;
+                    return null;
                 }
 
                 utterance.voice = speakerVoice;
@@ -44,14 +68,25 @@ const tts = (() => {
         }
 
         speak(text) {
-            const utterance = this.getUtterance(text);
             const self = this;
 
             return new Promise((resolve, reject) => {
-                utterance["onend"] = resolve;
-                utterance["onerror"] = reject;
+                checkVoices().then(() => {
+                    const utterance = self.getUtterance(text);
 
-                self._speaker.speak(utterance);
+                    if (!utterance) {
+                        rejectWithMsg(reject, "Speech could not be initialized due to invalid voice");
+                    }
+
+                    utterance["onend"] = resolve;
+                    utterance["onerror"] = () => {
+                        rejectWithMsg(reject, "Unable to speak the provided text");
+                    };
+
+                    self._speaker.speak(utterance);
+                }).catch((err) => {
+                    rejectWithMsg(reject, err.msg);
+                })
             });
         }
     }
@@ -61,6 +96,7 @@ const tts = (() => {
     );
 
     return {
+        checkVoices,
         isSupported,
         createSpeaker,
     }
