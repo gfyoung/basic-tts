@@ -1,0 +1,27 @@
+{
+  "name": "basic-tts",
+  "version": "1.0.0",
+  "descripton": "Basic wrapper around browser TTS functionality",
+  "main": "basic-tts.js",
+  "scripts": {
+    "lint": "./node_modules/eslint/bin/eslint.js ."
+  },
+  "author": "G. Young",
+  "keywords": [
+    "brower speech synthesis",
+    "browser text to speech",
+    "browser speech api",
+    "speech synthesis",
+    "web speech api",
+    "text to speech",
+    "wrapper",
+    "speech",
+    "speak",
+    "tts"
+  ],
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.9.0"
+  }
+}

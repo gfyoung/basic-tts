@@ -6,7 +6,7 @@ const tts = (() => {
 
     const rejectWithMsg = (reject, msg) => {
         reject({ msg });
-    }
+    };
 
     const checkVoices = () => {
         return new Promise((resolve, reject) => {
@@ -25,7 +25,7 @@ const tts = (() => {
                     });
                 }
             }, 100);
-        })
+        });
     };
 
     class Speaker {
@@ -64,7 +64,7 @@ const tts = (() => {
                 utterance.voice = speakerVoice;
             }
 
-            return utterance
+            return utterance;
         }
 
         speak(text) {
@@ -75,18 +75,20 @@ const tts = (() => {
                     const utterance = self.getUtterance(text);
 
                     if (!utterance) {
-                        rejectWithMsg(reject, "Speech could not be initialized due to invalid voice");
+                        rejectWithMsg(reject, "Speech could not be " +
+                            "initialized due to invalid voice");
                     }
 
                     utterance["onend"] = resolve;
                     utterance["onerror"] = () => {
-                        rejectWithMsg(reject, "Unable to speak the provided text");
+                        rejectWithMsg(reject, "Unable to speak " +
+                            "the provided text");
                     };
 
                     self._speaker.speak(utterance);
                 }).catch((err) => {
                     rejectWithMsg(reject, err.msg);
-                })
+                });
             });
         }
     }
@@ -99,7 +101,7 @@ const tts = (() => {
         checkVoices,
         isSupported,
         createSpeaker,
-    }
+    };
 })();
 
 if (typeof(module) !== "undefined") {
