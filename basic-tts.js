@@ -1,15 +1,31 @@
 "use strict";
 
 const tts = (() => {
+    /**
+     * Check if text-to-speech is supported.
+     *
+     * @returns {Boolean} - Whether text-to-speech is supported.
+     */
     const isSupported = () => (
         (typeof(window) !== "undefined" && "speechSynthesis" in window
             && "SpeechSynthesisUtterance" in window)
     );
 
+    /**
+     * Simple wrapper around a reject function for a Promise.
+     *
+     * @param {Function} reject - The Promise rejection function.
+     * @param {String} msg - The message to send.
+     */
     const rejectWithMsg = (reject, msg) => {
         reject({ msg });
     };
 
+    /**
+     * Check that we have voices available for speaking.
+     *
+     * @returns {Promise}
+     */
     const checkVoices = () => {
         return new Promise((resolve, reject) => {
             if (!isSupported()) {
@@ -31,6 +47,12 @@ const tts = (() => {
     };
 
     class Speaker {
+        /**
+         * Construct a new speaker instance.
+         *
+         * @param {Object} props - A dictionary of properties for our
+         *     SpeechSynthesisUtterance class.
+         */
         constructor(props) {
             if (!isSupported()) {
                 throw "Text-to-speech is not supported!";
@@ -40,6 +62,12 @@ const tts = (() => {
             this._speaker = window.speechSynthesis;
         }
 
+        /**
+         * Construct our SpeechSynthesisUtterance for speaking.
+         *
+         * @param {String} text - The text to speak.
+         * @returns {SpeechSynthesisUtterance}
+         */
         getUtterance(text) {
             const utterance = new SpeechSynthesisUtterance(text);
 
@@ -69,6 +97,12 @@ const tts = (() => {
             return utterance;
         }
 
+        /**
+         * Speak a piece of text.
+         *
+         * @param {String} text - The text to speak.
+         * @returns {Promise}
+         */
         speak(text) {
             const self = this;
 
@@ -95,6 +129,16 @@ const tts = (() => {
         }
     }
 
+    /**
+     * Convenience function for initialization our Speaker class.
+     *
+     * Doing this places an abstraction layer above the Speaker class, giving
+     * us freedom to modify however we want without disrupting end-user code.
+     *
+     * @param {Object} props - A dictionary of properties for our
+     *     SpeechSynthesisUtterance class.
+     * @returns {Speaker}
+     */
     const createSpeaker = (props) => (
         new Speaker(props)
     );
