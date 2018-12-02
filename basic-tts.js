@@ -1,3 +1,5 @@
+"use strict";
+
 const tts = (() => {
     const isSupported = () => (
         (typeof(window) !== "undefined" && "speechSynthesis" in window
@@ -104,6 +106,14 @@ const tts = (() => {
     };
 })();
 
-if (typeof(module) !== "undefined") {
+// Node.
+if (typeof(module) === "object" && typeof(module.exports) === "object") {
     module.exports = tts;
+}
+
+// AMD.
+if (typeof(define) === "function" && define.amd) {
+    define("basic-tts", [], () => {
+        return tts;
+    });
 }
