@@ -122,8 +122,6 @@ const tts = (() => {
                     };
 
                     self._speaker.speak(utterance);
-                }).catch((err) => {
-                    rejectWithMsg(reject, err.msg);
                 });
             });
         }
