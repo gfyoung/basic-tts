@@ -21,17 +21,8 @@ const tts = (() => {
         reject({ msg });
     };
 
-    /**
-     * Check that we have voices available for speaking.
-     *
-     * @returns {Promise}
-     */
-    const checkVoices = () => {
+    const loadVoices = () => {
         return new Promise((resolve, reject) => {
-            if (!isSupported()) {
-                rejectWithMsg(reject, "Text-to-speech is not supported!");
-            }
-
             setTimeout(() => {
                 const voices = speechSynthesis.getVoices();
 
@@ -43,6 +34,31 @@ const tts = (() => {
                     });
                 }
             }, 100);
+        });
+    };
+
+    /**
+     * Check that we have voices available for speaking.
+     *
+     * @param {Number=} attempts - The number of attempts to retrieve
+     *     voices. The default is 10 times.
+     * @returns {Promise}
+     */
+    const checkVoices = (attempts) => {
+        if (isSupported()) {
+            throw "Text-to-speech is not supported!";
+        }
+
+        const defaultAttempts = 10;
+        attempts = Math.min(Math.max(parseInt(attempts) ||
+            defaultAttempts, 0), defaultAttempts);
+
+        return loadVoices().catch((err) => {
+            if (attempts === 0) {
+                throw err;
+            } else {
+                return checkVoices(attempts - 1);
+            }
         });
     };
 
@@ -101,13 +117,15 @@ const tts = (() => {
          * Speak a piece of text.
          *
          * @param {String} text - The text to speak.
+         * @param {Number=} attempts - The number of attempts to retrieve
+         *     voices before attempting to speak.
          * @returns {Promise}
          */
-        speak(text) {
+        speak(text, attempts) {
             const self = this;
 
             return new Promise((resolve, reject) => {
-                checkVoices().then(() => {
+                checkVoices(attempts).then(() => {
                     const utterance = self.getUtterance(text);
 
                     if (!utterance) {
