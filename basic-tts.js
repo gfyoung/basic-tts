@@ -172,8 +172,14 @@ if (typeof(module) === "object" && typeof(module.exports) === "object") {
 }
 
 // AMD.
+//
+// One of the following define calls should work.
 if (typeof(define) === "function" && define.amd) {
     define("basic-tts", [], () => {
+        return tts;
+    });
+
+    define([], () => {
         return tts;
     });
 }
