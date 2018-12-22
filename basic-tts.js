@@ -1,15 +1,70 @@
 "use strict";
 
 const tts = (() => {
+    let testWindow;
+    let testingEnabled = false;
+
+    /**
+     * Enable test mode.
+     *
+     * @param {Object} mockWindow - The mock window object.
+     */
+    const enableTesting = (mockWindow) => {
+        testWindow = mockWindow;
+        testingEnabled = true;
+    };
+
+    /**
+     * Disable test mode and return to production mode.
+     */
+    const disableTesting = () => {
+        testWindow = null;
+        testingEnabled = false;
+    };
+
+    /**
+     * Check if we're in test mode or not.
+     *
+     * @returns {Boolean}
+     */
+    const isTestingEnabled = () => (
+        testingEnabled
+    );
+
+    /**
+     * Get the window object, depending on whether we're in test mode or not.
+     *
+     * @returns {Window}
+     */
+    const getWindow = () => (
+        isTestingEnabled() ? testWindow : window
+    );
+
     /**
      * Check if text-to-speech is supported.
      *
      * @returns {Boolean} - Whether text-to-speech is supported.
      */
-    const isSupported = () => (
-        (typeof(window) !== "undefined" && "speechSynthesis" in window
-            && "SpeechSynthesisUtterance" in window)
-    );
+    const isSupported = () => {
+        const window = getWindow();
+
+        if (typeof(window) !== "object") {
+            console.warn("window is undefined!");
+            return false;
+        }
+
+        if (typeof(window.speechSynthesis) !== "object") {
+            console.warn("speechSynthesis is undefined!");
+            return false;
+        }
+
+        if (typeof(window.SpeechSynthesisUtterance) !== "function") {
+            console.warn("SpeechSynthesisUtterance is undefined!");
+            return false;
+        }
+
+        return true;
+    };
 
     /**
      * Simple wrapper around a reject function for a Promise.
@@ -24,7 +79,7 @@ const tts = (() => {
     const loadVoices = () => {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
-                const voices = speechSynthesis.getVoices();
+                const voices = getWindow().speechSynthesis.getVoices();
 
                 if (voices.length === 0) {
                     rejectWithMsg(reject, "No voices available for use.");
@@ -45,12 +100,12 @@ const tts = (() => {
      * @returns {Promise}
      */
     const checkVoices = (attempts) => {
-        if (isSupported()) {
+        if (!isSupported()) {
             throw "Text-to-speech is not supported!";
         }
 
         const defaultAttempts = 10;
-        attempts = Math.min(Math.max(parseInt(attempts) ||
+        attempts = Math.min(Math.max(attempts ||
             defaultAttempts, 0), defaultAttempts);
 
         return loadVoices().catch((err) => {
@@ -75,7 +130,8 @@ const tts = (() => {
             }
 
             this._props = props || {};
-            this._speaker = window.speechSynthesis;
+            this._window = getWindow();
+            this._speaker = this._window.speechSynthesis;
         }
 
         /**
@@ -85,7 +141,7 @@ const tts = (() => {
          * @returns {SpeechSynthesisUtterance}
          */
         getUtterance(text) {
-            const utterance = new SpeechSynthesisUtterance(text);
+            const utterance = new this._window.SpeechSynthesisUtterance(text);
 
             for (const key of ["lang", "volume", "pitch", "rate"]) {
                 const value = utterance[key];
@@ -160,9 +216,15 @@ const tts = (() => {
     );
 
     return {
+        // Main methods.
         checkVoices,
         isSupported,
         createSpeaker,
+
+        // Test methods.
+        enableTesting,
+        disableTesting,
+        isTestingEnabled,
     };
 })();
 

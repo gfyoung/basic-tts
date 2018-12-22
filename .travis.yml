@@ -13,7 +13,12 @@ install:
 jobs:
   include:
     - stage: test
+      name: "Unit"
+      script: npm test
+    - name: "Lint"
       script: npm run lint
     - stage: check
+      name: "Audit"
       script: npm audit
-    - script: npm outdated
+    - name: "Outdated"
+      script: npm outdated

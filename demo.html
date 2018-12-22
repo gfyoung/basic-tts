@@ -16,7 +16,8 @@
 
                 speaker.speak("Hello! This is text to speech").then(() => {
                     console.log("The speaker has spoken!");
-                }).catch(() => {
+                }).catch((err) => {
+                    console.warn(`An error has occurred: ${err}`);
                     console.log("Sigh...the speaker did not speak :(");
                 });
             };
