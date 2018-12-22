@@ -6,4 +6,5 @@
 *.iml
 
 # JS files
+coverage
 node_modules
