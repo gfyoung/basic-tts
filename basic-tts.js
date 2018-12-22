@@ -37,7 +37,8 @@ const tts = (() => {
      * @returns {Window}
      */
     const getWindow = () => (
-        isTestingEnabled() ? testWindow : window
+        isTestingEnabled() ? testWindow :
+            (typeof(window) === "undefined" ? undefined : window)
     );
 
     /**
