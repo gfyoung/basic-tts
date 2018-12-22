@@ -5,7 +5,10 @@ const tts = require("./basic-tts");
  */
 const NOP = () => {};
 
-const basicMockSpeechSynthesis = {getVoices: NOP};
+const basicMockSpeechSynthesis = {
+    getVoices: NOP,
+    speak: NOP,
+};
 
 const basicMockWindow = {
     speechSynthesis: basicMockSpeechSynthesis,
@@ -37,7 +40,10 @@ class MockSpeechSynthesisUtterance {
 const getMockWindowWithAttempts = (n, data) => (
     {
         SpeechSynthesisUtterance: NOP,
-        speechSynthesis: {getVoices: mockGetVoices(n, data)}
+        speechSynthesis: {
+            getVoices: mockGetVoices(n, data),
+            speak: NOP,
+        }
     }
 );
 
@@ -57,8 +63,12 @@ const assertUtterancePropsEqual = (utterance, props) => {
 const getMockWindowWithUtteranceClass = (...names) => (
     {
         SpeechSynthesisUtterance: MockSpeechSynthesisUtterance,
-        speechSynthesis: {getVoices: mockGetVoices(0,
-            names.map(name => ({name})))}
+        speechSynthesis: {
+            getVoices: mockGetVoices(0, names.map(name => (
+                {name}
+            ))),
+            speak: NOP,
+        }
     }
 );
 
@@ -141,6 +151,7 @@ const mockGetVoices = (n, data) => {
 };
 
 module.exports = {
+    NOP,
     basicMockSpeechSynthesis,
     basicMockWindow,
     getMockWindowWithUtteranceClass,

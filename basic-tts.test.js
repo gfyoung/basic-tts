@@ -103,6 +103,35 @@ describe("isSupported", () => {
                     }, content);
                 });
             });
+
+            describe("configured with speak that is", () => {
+                const content = "speechSynthesis.speak is undefined!";
+
+                test("undefined", () => {
+                    utils.checkWarns(() => {
+                        tts.enableTesting({
+                            speechSynthesis: {
+                                getVoices: utils.NOP
+                            }
+                        });
+
+                        expect(tts.isSupported()).toBeFalsy();
+                    }, content);
+                });
+
+                test("not a function", () => {
+                    utils.checkWarns(() => {
+                        tts.enableTesting({
+                            speechSynthesis: {
+                                getVoices: utils.NOP,
+                                speak: "foo",
+                            }
+                        });
+
+                        expect(tts.isSupported()).toBeFalsy();
+                    }, content);
+                });
+            });
         });
 
         describe("SpeechSynthesisUtterance is", () => {

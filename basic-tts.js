@@ -58,9 +58,11 @@ const tts = (() => {
             return false;
         }
 
-        if (typeof(window.speechSynthesis.getVoices) !== "function") {
-            console.warn("speechSynthesis.getVoices is undefined!");
-            return false;
+        for (const method of ["getVoices", "speak"]) {
+            if (typeof(window.speechSynthesis[method]) !== "function") {
+                console.warn(`speechSynthesis.${method} is undefined!`);
+                return false;
+            }
         }
 
         if (typeof(window.SpeechSynthesisUtterance) !== "function") {
