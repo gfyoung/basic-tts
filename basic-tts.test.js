@@ -1,16 +1,11 @@
-const tts = require("../basic-tts");
+const tts = require("./basic-tts");
+const utils = require("./utils");
 
-/**
- * Function that does nothing.
- */
-const NOP = () => {};
+const basicMockWindow = utils.basicMockWindow;
 
-const basicMockSpeechSynthesis = {getVoices: NOP};
-
-const basicMockWindow = {
-    speechSynthesis: basicMockSpeechSynthesis,
-    SpeechSynthesisUtterance: NOP,
-};
+// beforeEach(() => {
+//     jest.setTimeout(100000);
+// });
 
 afterEach(() => {
     tts.disableTesting();
@@ -49,41 +44,18 @@ describe("testing framework is", () => {
 
 describe("isSupported", () => {
     describe("returns false because", () => {
-        /**
-         * Wrapper around test functions to check `console.warns` content.
-         *
-         * @param {Function} fn - The test function to call.
-         * @param stmts - List of strings to check in log content.
-         */
-        const checkWarns = (fn, ...stmts) => {
-            const log = [];
-            const original = console.warn;
-
-            global.console.warn = (content) => {
-                log.push(content);
-            };
-
-            fn();
-
-            for (const stmt of stmts) {
-                expect(log).toContain(stmt);
-            }
-
-            global.console.warn = original;
-        };
-
         describe("window is", () => {
             const content = "window is undefined!";
 
             test("undefined", () => {
-                checkWarns(() => {
+                utils.checkWarns(() => {
                     tts.enableTesting(undefined);
                     expect(tts.isSupported()).toBeFalsy();
                 }, content);
             });
 
             test("not an object", () => {
-                checkWarns(() => {
+                utils.checkWarns(() => {
                     tts.enableTesting(2);
                     expect(tts.isSupported()).toBeFalsy();
                 }, content);
@@ -95,14 +67,14 @@ describe("isSupported", () => {
             const content = "speechSynthesis is undefined!";
 
             test("undefined", () => {
-                checkWarns(() => {
+                utils.checkWarns(() => {
                     tts.enableTesting({});
                     expect(tts.isSupported()).toBeFalsy();
                 }, content);
             });
 
             test("not an object", () => {
-                checkWarns(() => {
+                utils.checkWarns(() => {
                     tts.enableTesting({speechSynthesis: "foo"});
                     expect(tts.isSupported()).toBeFalsy();
                 }, content);
@@ -112,14 +84,14 @@ describe("isSupported", () => {
                 const content = "speechSynthesis.getVoices is undefined!";
 
                 test("undefined", () => {
-                    checkWarns(() => {
+                    utils.checkWarns(() => {
                         tts.enableTesting({speechSynthesis: {}});
                         expect(tts.isSupported()).toBeFalsy();
                     }, content);
                 });
 
                 test("not a function", () => {
-                    checkWarns(() => {
+                    utils.checkWarns(() => {
                         tts.enableTesting({
                             speechSynthesis: {
                                 getVoices: 2
@@ -136,9 +108,9 @@ describe("isSupported", () => {
             const content = "SpeechSynthesisUtterance is undefined!";
 
             test("undefined", () => {
-                checkWarns(() => {
+                utils.checkWarns(() => {
                     tts.enableTesting({
-                        speechSynthesis: basicMockSpeechSynthesis
+                        speechSynthesis: utils.basicMockSpeechSynthesis
                     });
 
                     expect(tts.isSupported()).toBeFalsy();
@@ -146,9 +118,9 @@ describe("isSupported", () => {
             });
 
             test("is not a function", () => {
-                checkWarns(() => {
+                utils.checkWarns(() => {
                     tts.enableTesting({
-                        speechSynthesis: basicMockSpeechSynthesis,
+                        speechSynthesis: utils.basicMockSpeechSynthesis,
                         SpeechSynthesisUtterance: [],
                     });
                     expect(tts.isSupported()).toBeFalsy();
@@ -163,9 +135,44 @@ describe("isSupported", () => {
     });
 });
 
+describe("checkVoices", () => {
+    describe("fails because", () => {
+        test("unsupported", () => {
+            tts.enableTesting(undefined);
+
+            expect(() => {
+                tts.checkVoices();
+            }).toThrow("not supported");
+        });
+
+        describe("all attempts failed, with", () => {
+            test("zero remaining", (done) => {
+                return utils.checkCheckVoices(done, 0);
+            });
+
+            test("one remaining", (done) => {
+                return utils.checkCheckVoices(done, 1);
+            });
+        });
+    });
+
+    describe("succeeds after", () => {
+        const data = [1, 2];
+
+        test("one try", (done) => {
+            return utils.checkCheckVoices(done, 0, data);
+        });
+
+        test("two tries", (done) => {
+            return utils.checkCheckVoices(done, 1, data);
+        });
+    });
+});
+
 describe("createSpeaker", () => {
     test("fails because unsupported", () => {
         tts.enableTesting(undefined);
+
         expect(() => {
             tts.createSpeaker();
         }).toThrow("not supported");

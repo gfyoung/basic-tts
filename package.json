@@ -7,6 +7,11 @@
     "test": "jest --coverage",
     "lint": "./node_modules/eslint/bin/eslint.js ."
   },
+  "jest": {
+    "collectCoverageFrom": [
+      "basic-tts.js"
+    ]
+  },
   "author": "G. Young",
   "keywords": [
     "brower speech synthesis",

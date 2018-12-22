@@ -90,6 +90,11 @@ const tts = (() => {
         reject({ msg });
     };
 
+    /**
+     * Get voices from speechSynthesis (after delay) and check if they exist.
+     *
+     * @returns {Promise}
+     */
     const loadVoices = () => {
         return new Promise((resolve, reject) => {
             setTimeout(() => {
@@ -117,8 +122,16 @@ const tts = (() => {
         errOnUnsupported();
 
         const defaultAttempts = 10;
-        attempts = Math.min(Math.max(attempts ||
-            defaultAttempts, 0), defaultAttempts);
+
+        if (typeof(attempts) === "undefined") {
+            attempts = defaultAttempts;
+        } else if (typeof(attempts) !== "number") {
+            attempts = parseInt(attempts.toString());
+        }
+
+        if (isNaN(attempts) || attempts < 0) {
+            attempts = defaultAttempts;
+        }
 
         return loadVoices().catch((err) => {
             if (attempts === 0) {
