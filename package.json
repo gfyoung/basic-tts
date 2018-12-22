@@ -4,7 +4,7 @@
   "descripton": "Basic wrapper around browser TTS functionality",
   "main": "basic-tts.js",
   "scripts": {
-    "test": "jest tests --coverage",
+    "test": "jest --coverage",
     "lint": "./node_modules/eslint/bin/eslint.js ."
   },
   "author": "G. Young",

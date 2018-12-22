@@ -7,7 +7,7 @@ const tts = (() => {
     /**
      * Enable test mode.
      *
-     * @param {Object} mockWindow - The mock window object.
+     * @param {Object=} mockWindow - The mock window object.
      */
     const enableTesting = (mockWindow) => {
         testWindow = mockWindow;
