@@ -4,7 +4,40 @@ afterEach(() => {
     tts.disableTesting();
 });
 
+describe("testing framework is", () => {
+    test("disabled by default", () => {
+        expect(tts.isTestingEnabled()).toBeFalsy();
+    });
+
+    test("disabled when already default disabled", () => {
+        tts.disableTesting();
+        expect(tts.isTestingEnabled()).toBeFalsy();
+    });
+
+    test("enabled", () => {
+        tts.enableTesting();
+        expect(tts.isTestingEnabled()).toBeTruthy();
+    });
+
+    test("enabled, then disabled", () => {
+        tts.enableTesting();
+        tts.disableTesting();
+
+        expect(tts.isTestingEnabled()).toBeFalsy();
+    });
+
+    test("enabled, disabled, and then re-enabled", () => {
+        tts.enableTesting();
+        tts.disableTesting();
+        tts.enableTesting();
+
+        expect(tts.isTestingEnabled()).toBeTruthy();
+    });
+});
+
 describe("isSupported", () => {
+    const mockSpeechSynthesis = {getVoices: () => {}};
+
     describe("returns false because", () => {
         /**
          * Wrapper around test functions to check `console.warns` content.
@@ -64,6 +97,29 @@ describe("isSupported", () => {
                     expect(tts.isSupported()).toBeFalsy();
                 }, content);
             });
+
+            describe("configured with getVoices that is", () => {
+                const content = "speechSynthesis.getVoices is undefined!";
+
+                test("undefined", () => {
+                    checkWarns(() => {
+                        tts.enableTesting({speechSynthesis: {}});
+                        expect(tts.isSupported()).toBeFalsy();
+                    }, content);
+                });
+
+                test("not a function", () => {
+                    checkWarns(() => {
+                        tts.enableTesting({
+                            speechSynthesis: {
+                                getVoices: 2
+                            }
+                        });
+
+                        expect(tts.isSupported()).toBeFalsy();
+                    }, content);
+                });
+            });
         });
 
         describe("SpeechSynthesisUtterance is", () => {
@@ -71,7 +127,10 @@ describe("isSupported", () => {
 
             test("undefined", () => {
                 checkWarns(() => {
-                    tts.enableTesting({speechSynthesis: {},});
+                    tts.enableTesting({
+                        speechSynthesis: mockSpeechSynthesis
+                    });
+
                     expect(tts.isSupported()).toBeFalsy();
                 }, content);
             });
@@ -79,7 +138,7 @@ describe("isSupported", () => {
             test("is not a function", () => {
                 checkWarns(() => {
                     tts.enableTesting({
-                        speechSynthesis: {},
+                        speechSynthesis: mockSpeechSynthesis,
                         SpeechSynthesisUtterance: [],
                     });
                     expect(tts.isSupported()).toBeFalsy();
@@ -90,40 +149,10 @@ describe("isSupported", () => {
 
     test("returns true", () => {
         tts.enableTesting({
-            speechSynthesis: {}, SpeechSynthesisUtterance: () => {}
+            speechSynthesis: mockSpeechSynthesis,
+            SpeechSynthesisUtterance: () => {}
         });
 
         expect(tts.isSupported()).toBeTruthy();
-    });
-});
-
-describe("testing framework is", () => {
-    test("disabled by default", () => {
-        expect(tts.isTestingEnabled()).toBeFalsy();
-    });
-
-    test("disabled when already default disabled", () => {
-        tts.disableTesting();
-        expect(tts.isTestingEnabled()).toBeFalsy();
-    });
-
-    test("enabled", () => {
-        tts.enableTesting();
-        expect(tts.isTestingEnabled()).toBeTruthy();
-    });
-
-    test("enabled, then disabled", () => {
-        tts.enableTesting();
-        tts.disableTesting();
-
-        expect(tts.isTestingEnabled()).toBeFalsy();
-    });
-
-    test("enabled, disabled, and then re-enabled", () => {
-        tts.enableTesting();
-        tts.disableTesting();
-        tts.enableTesting();
-
-        expect(tts.isTestingEnabled()).toBeTruthy();
     });
 });
