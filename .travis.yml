@@ -8,7 +8,12 @@ node_js:
 sudo: false
 
 install:
-  - npm install eslint
+  - npm install
 
-script:
-  - eslint .
+jobs:
+  include:
+    - stage: test
+      script: npm run lint
+    - stage: check
+      script: npm audit
+    - script: npm outdated
