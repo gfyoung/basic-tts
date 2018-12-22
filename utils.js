@@ -12,10 +12,53 @@ const basicMockWindow = {
     SpeechSynthesisUtterance: NOP,
 };
 
+class MockSpeechSynthesisUtterance {
+    constructor(text) {
+        this.voice = null;
+        this.text = text;
+
+        this.lang = "en-US";
+        this.volume = -1;
+        this.pitch = -1;
+        this.rate = -1;
+    }
+}
+
+/**
+ * Generate a mock Window instance with specific getVoices behavior.
+ *
+ * The mocked getVoices will return an empty array for `n` times,
+ * after which it will return the provided data.
+ *
+ * @param {Number} n - The number of attempts before returning data.
+ * @param {Array} data - The data array to return.
+ * @returns {Object}
+ */
 const getMockWindowWithAttempts = (n, data) => (
     {
         SpeechSynthesisUtterance: NOP,
         speechSynthesis: {getVoices: mockGetVoices(n, data)}
+    }
+);
+
+/**
+ * Check that the properties of two utterances are equal.
+ *
+ * @param {SpeechSynthesisUtterance|MockSpeechSynthesisUtterance} utterance -
+ *    The utterance to check.
+ * @param {Object} props - The expected property values.
+ */
+const assertUtterancePropsEqual = (utterance, props) => {
+    for (key of ["rate", "voice", "pitch", "text", "volume", "lang"]) {
+        expect(utterance[key]).toEqual(props[key]);
+    }
+};
+
+const getMockWindowWithUtteranceClass = (...names) => (
+    {
+        SpeechSynthesisUtterance: MockSpeechSynthesisUtterance,
+        speechSynthesis: {getVoices: mockGetVoices(0,
+            names.map(name => ({name})))}
     }
 );
 
@@ -100,6 +143,8 @@ const mockGetVoices = (n, data) => {
 module.exports = {
     basicMockSpeechSynthesis,
     basicMockWindow,
+    getMockWindowWithUtteranceClass,
+    assertUtterancePropsEqual,
     checkCheckVoices,
     checkWarns,
 };

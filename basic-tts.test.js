@@ -2,6 +2,7 @@ const tts = require("./basic-tts");
 const utils = require("./utils");
 
 const basicMockWindow = utils.basicMockWindow;
+const complexMockWindow = utils.getMockWindowWithUtteranceClass("foo", "bar");
 
 // beforeEach(() => {
 //     jest.setTimeout(100000);
@@ -198,5 +199,76 @@ describe("createSpeaker", () => {
             expect(speaker._window).toEqual(basicMockWindow);
             expect(speaker._speaker).toEqual(basicMockWindow.speechSynthesis);
         });
+    });
+});
+
+describe("speakerUtterance with", () => {
+    const text = "hello";
+
+    test("no arguments", () => {
+        tts.enableTesting(complexMockWindow);
+        const speaker = tts.createSpeaker();
+        const utterance = speaker.getUtterance(text);
+
+        const expected = {
+            text,
+            rate: -1,
+            pitch: -1,
+            volume: -1,
+            voice: null,
+            lang: "en-US",
+        };
+
+        utils.assertUtterancePropsEqual(utterance, expected);
+    });
+
+    test("some overrides", () => {
+        tts.enableTesting(complexMockWindow);
+
+        const rate = 5;
+        const volume = 7;
+
+        const speaker = tts.createSpeaker({rate, volume});
+        const utterance = speaker.getUtterance(text);
+
+        const expected = {
+            rate,
+            text,
+            volume,
+            pitch: -1,
+            voice: null,
+            lang: "en-US",
+        };
+
+        utils.assertUtterancePropsEqual(utterance, expected);
+    });
+
+    test("voice mismatch", () => {
+        tts.enableTesting(complexMockWindow);
+
+        const speaker = tts.createSpeaker({voice: "baz"});
+        const utterance = speaker.getUtterance(text);
+        expect(utterance).toBeNull();
+    });
+
+    test("voice match", () => {
+        tts.enableTesting(complexMockWindow);
+
+        const rate = 3;
+        const voice = "bar";
+
+        const speaker = tts.createSpeaker({rate, voice});
+        const utterance = speaker.getUtterance(text);
+
+        const expected = {
+            rate,
+            text,
+            pitch: -1,
+            volume: -1,
+            lang: "en-US",
+            voice: {name: voice},
+        };
+
+        utils.assertUtterancePropsEqual(utterance, expected);
     });
 });
