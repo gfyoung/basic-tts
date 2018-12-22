@@ -221,7 +221,7 @@ const tts = (() => {
                     };
 
                     self._speaker.speak(utterance);
-                });
+                }).catch(reject);
             });
         }
     }

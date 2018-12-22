@@ -24,6 +24,9 @@ class MockSpeechSynthesisUtterance {
         this.volume = -1;
         this.pitch = -1;
         this.rate = -1;
+
+        this.onerror = NOP;
+        this.onend = NOP;
     }
 }
 
@@ -34,12 +37,13 @@ class MockSpeechSynthesisUtterance {
  * after which it will return the provided data.
  *
  * @param {Number} n - The number of attempts before returning data.
- * @param {Array} data - The data array to return.
+ * @param {Object=} data - The data to return. Should have a length attribute.
+ *     Otherwise, the input will be overwritten with an empty array.
  * @returns {Object}
  */
 const getMockWindowWithAttempts = (n, data) => (
     {
-        SpeechSynthesisUtterance: NOP,
+        SpeechSynthesisUtterance: MockSpeechSynthesisUtterance,
         speechSynthesis: {
             getVoices: mockGetVoices(n, data),
             speak: NOP,
@@ -60,20 +64,37 @@ const assertUtterancePropsEqual = (utterance, props) => {
     }
 };
 
-const getMockWindowWithUtteranceClass = (...names) => (
-    {
-        SpeechSynthesisUtterance: MockSpeechSynthesisUtterance,
-        speechSynthesis: {
-            getVoices: mockGetVoices(0, names.map(name => (
-                {name}
-            ))),
-            speak: NOP,
-        }
-    }
+/**
+ * Create a mock Window with a duck-typed utterance class.
+ *
+ * @param names - The names of the speakers to provide as data.
+ * @returns {Object}
+ */
+const getMockWindowWithVoices = (...names) => (
+    getMockWindowWithAttempts(0, names.map(name => (
+        {name}
+    )))
 );
 
 /**
- * Check that all attempts to get voices fails.
+ * Force an object to be an array-like.
+ *
+ * If the input does not have a length attribute, it will be
+ * overwritten as an empty array.
+ *
+ * @param {Object} obj - The force to force to be an array.
+ * @returns {Array}
+ */
+const forceAsArray = (obj) => {
+    obj = obj || [];
+    return "length" in obj ? obj : [];
+};
+
+/**
+ * Check the behavior of checkVoices.
+ *
+ * If valid return data is provided, we expect no rejected Promises. If no
+ * valid data is provided, we expected no resolved Promises.
  *
  * @param {Function} done - Jasmine function used indicating a finished test.
  * @param {Number} n - The number of attempts to retrieve voices.
@@ -82,8 +103,7 @@ const getMockWindowWithUtteranceClass = (...names) => (
  * @returns {Promise}
  */
 const checkCheckVoices = (done, n, data) => {
-    data = data || [];
-    data = "length" in data ? data : [];
+    data = forceAsArray(data);
 
     tts.enableTesting(getMockWindowWithAttempts(n, data));
 
@@ -134,10 +154,13 @@ const checkWarns = (fn, ...stmts) => {
  * Mock getting voices and returning data after a certain number of attempts.
  *
  * @param {Number} n - The number of attempts before returning data.
- * @param {Array} data - The data array to return.
+ * @param {Object=} data - The data to return. Should have a length attribute.
+ *     Otherwise, the input will be overwritten with an empty array.
  * @returns {Function}
  */
 const mockGetVoices = (n, data) => {
+    data = forceAsArray(data);
+
     let counter = 0;
 
     return () => {
@@ -154,7 +177,8 @@ module.exports = {
     NOP,
     basicMockSpeechSynthesis,
     basicMockWindow,
-    getMockWindowWithUtteranceClass,
+    getMockWindowWithVoices,
+    getMockWindowWithAttempts,
     assertUtterancePropsEqual,
     checkCheckVoices,
     checkWarns,

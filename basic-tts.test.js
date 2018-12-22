@@ -1,8 +1,9 @@
 const tts = require("./basic-tts");
 const utils = require("./utils");
 
+const names = ["foo", "bar"];
 const basicMockWindow = utils.basicMockWindow;
-const complexMockWindow = utils.getMockWindowWithUtteranceClass("foo", "bar");
+const complexMockWindow = utils.getMockWindowWithVoices(...names);
 
 // beforeEach(() => {
 //     jest.setTimeout(100000);
@@ -299,5 +300,69 @@ describe("speakerUtterance with", () => {
         };
 
         utils.assertUtterancePropsEqual(utterance, expected);
+    });
+});
+
+describe("speakText", () => {
+    const text = "foo";
+
+    describe("fails because", () => {
+        const expectSpeakToFail = (speaker, text, expected, done) => (
+            speaker.speak(text).then((result) => {
+                done(new Error(`Unexpected data received: ${result}`));
+            }).catch((err) => {
+                expect(err).toEqual(expected);
+                done();
+            })
+        );
+
+        test("voices did not initialize", (done) => {
+            tts.enableTesting(utils.getMockWindowWithAttempts(0));
+
+            const speaker = tts.createSpeaker();
+            const expected = {
+                msg: "No voices available for use."
+            };
+
+            return expectSpeakToFail(speaker, text, expected, done);
+        });
+
+        test("speaking produced unknown error", (done) => {
+            const mockWindow = utils.getMockWindowWithVoices(...names);
+            mockWindow.speechSynthesis.speak = (utterance) => {
+                utterance.onerror(null);
+            };
+
+            tts.enableTesting(mockWindow);
+
+            const speaker = tts.createSpeaker({voice: "foo"});
+            const expected = {
+                msg: "Unable to speak the provided text"
+            };
+
+            return expectSpeakToFail(speaker, text, expected, done);
+        });
+    });
+
+    test("succeeds", (done) => {
+        const mockWindow = utils.getMockWindowWithVoices(...names);
+        let hasSpoken = false;
+
+        mockWindow.speechSynthesis.speak = (utterance) => {
+            hasSpoken = true;
+            utterance.onend(null);
+        };
+
+        tts.enableTesting(mockWindow);
+
+        const speaker = tts.createSpeaker();
+        return speaker.speak(text).then((result) => {
+            expect(hasSpoken).toBeTruthy();
+            expect(result).toBeNull();
+
+            done();
+        }).catch((err) => {
+            done(new Error(`Unexpected error: ${JSON.stringify(err)}`));
+        });
     });
 });
