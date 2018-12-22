@@ -133,7 +133,7 @@ const tts = (() => {
         /**
          * Construct a new speaker instance.
          *
-         * @param {Object} props - A dictionary of properties for our
+         * @param {Object=} props - A dictionary of properties for our
          *     SpeechSynthesisUtterance class.
          */
         constructor(props) {
@@ -217,7 +217,7 @@ const tts = (() => {
      * Doing this places an abstraction layer above the Speaker class, giving
      * us freedom to modify however we want without disrupting end-user code.
      *
-     * @param {Object} props - A dictionary of properties for our
+     * @param {Object=} props - A dictionary of properties for our
      *     SpeechSynthesisUtterance class.
      * @returns {Speaker}
      */
