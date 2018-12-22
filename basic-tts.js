@@ -67,6 +67,15 @@ const tts = (() => {
     };
 
     /**
+     * Check if text-to-speech is supported and error if it's not.
+     */
+    const errOnUnsupported = () => {
+        if (!isSupported()) {
+            throw "Text-to-speech is not supported!";
+        }
+    };
+
+    /**
      * Simple wrapper around a reject function for a Promise.
      *
      * @param {Function} reject - The Promise rejection function.
@@ -100,9 +109,7 @@ const tts = (() => {
      * @returns {Promise}
      */
     const checkVoices = (attempts) => {
-        if (!isSupported()) {
-            throw "Text-to-speech is not supported!";
-        }
+        errOnUnsupported();
 
         const defaultAttempts = 10;
         attempts = Math.min(Math.max(attempts ||
@@ -125,9 +132,7 @@ const tts = (() => {
          *     SpeechSynthesisUtterance class.
          */
         constructor(props) {
-            if (!isSupported()) {
-                throw "Text-to-speech is not supported!";
-            }
+            errOnUnsupported();
 
             this._props = props || {};
             this._window = getWindow();
