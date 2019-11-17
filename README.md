@@ -11,6 +11,8 @@ Installation is relatively straightforward via [NPM Package Registry](https://gi
 npm install basic-tts
 ~~~
 
+Alternatively, you can use [GitHub's Package Registry](https://github.com/gfyoung/basic-tts/packages/57285).
+
 Afterwards, you can check the support of your browser in Node, for example, as follows:
 
 ```javascript
