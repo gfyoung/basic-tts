@@ -5,7 +5,7 @@
 Basic wrapper around the [Speech Synthesis API](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis).
 
 This is a bare-bones wrapper with no dependencies besides a browser that supports text-to-speech.
-Installation is relatively straightforward via [NPM Package Registry](https://github.com/gfyoung/basic-tts):
+Installation is relatively straightforward via [NPM Package Registry](https://www.npmjs.com/package/basic-tts):
 
 ~~~
 npm install basic-tts
