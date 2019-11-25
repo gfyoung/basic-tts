@@ -22,3 +22,7 @@ jobs:
       script: npm audit
     - name: "Outdated"
       script: npm outdated
+  allow_failures:
+    - name: "Audit"
+    - name: "Outdated"
+
