@@ -5,7 +5,7 @@
   "main": "basic-tts.js",
   "scripts": {
     "test": "jest --coverage",
-    "lint": "./node_modules/eslint/bin/eslint.js ."
+    "lint": "eslint ."
   },
   "jest": {
     "collectCoverageFrom": [
