@@ -1,6 +1,6 @@
 {
   "name": "basic-tts",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Basic wrapper around browser TTS functionality",
   "main": "basic-tts.js",
   "files": [
