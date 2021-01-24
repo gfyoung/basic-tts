@@ -3,6 +3,11 @@
   "version": "1.0.8",
   "description": "Basic wrapper around browser TTS functionality",
   "main": "basic-tts.js",
+  "files": [
+    "demo.html",
+    "LICENSE.txt",
+    "basic-tts.js"
+  ],
   "scripts": {
     "test": "jest --coverage",
     "lint": "eslint ."
