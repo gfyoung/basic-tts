@@ -5,10 +5,6 @@ const names = ["foo", "bar"];
 const basicMockWindow = utils.basicMockWindow;
 const complexMockWindow = utils.getMockWindowWithVoices(...names);
 
-// beforeEach(() => {
-//     jest.setTimeout(100000);
-// });
-
 afterEach(() => {
     tts.disableTesting();
 });
@@ -178,11 +174,11 @@ describe("checkVoices", () => {
 
         describe("all attempts failed, with", () => {
             test("zero remaining", (done) => {
-                return utils.checkCheckVoices(done, 0);
+                utils.checkCheckVoices(done, 0);
             });
 
             test("one remaining", (done) => {
-                return utils.checkCheckVoices(done, 1);
+                utils.checkCheckVoices(done, 1);
             });
         });
     });
@@ -191,11 +187,11 @@ describe("checkVoices", () => {
         const data = [1, 2];
 
         test("one try", (done) => {
-            return utils.checkCheckVoices(done, 0, data);
+            utils.checkCheckVoices(done, 0, data);
         });
 
         test("two tries", (done) => {
-            return utils.checkCheckVoices(done, 1, data);
+            utils.checkCheckVoices(done, 1, data);
         });
     });
 });
@@ -324,7 +320,7 @@ describe("speakText", () => {
                 msg: "No voices available for use."
             };
 
-            return expectSpeakToFail(speaker, text, expected, done);
+            expectSpeakToFail(speaker, text, expected, done);
         });
 
         test("speaking produced unknown error", (done) => {
@@ -340,7 +336,7 @@ describe("speakText", () => {
                 msg: "Unable to speak the provided text"
             };
 
-            return expectSpeakToFail(speaker, text, expected, done);
+            expectSpeakToFail(speaker, text, expected, done);
         });
     });
 
@@ -355,8 +351,7 @@ describe("speakText", () => {
 
         tts.enableTesting(mockWindow);
 
-        const speaker = tts.createSpeaker();
-        return speaker.speak(text).then((result) => {
+        tts.createSpeaker().speak(text).then((result) => {
             expect(hasSpoken).toBeTruthy();
             expect(result).toBeNull();
 
