@@ -2,13 +2,62 @@
 <html lang="en">
 <head>
     <title>Basic-TTS Demo</title>
+    <style>
+        a {
+            color: black;
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        hr {
+            margin-top: 1em;
+        }
+
+        #voice-container {
+            margin-bottom: 1em;
+        }
+
+        #voices {
+            outline: none;
+            padding: 0.25em;
+        }
+    </style>
     <script src="basic-tts.js"></script>
     <script>
         window.speechSynthesis.onvoiceschanged = () => {
+            const mappings = {};
+
+            const voices = document.getElementById("voices");
+            const voiceList = window.speechSynthesis.getVoices();
+
+            console.log(`Loaded ${voiceList.length} voice(s)`);
+
+            for (const voice of voiceList) {
+                const option = document.createElement("option");
+
+                mappings[voice.voiceURI] = voice;
+
+                option.value = voice.voiceURI;
+                option.label = `${voice.name} (${voice.lang})`;
+
+                voices.appendChild(option);
+            }
+
+            window.speechSynthesis.onvoiceschanged = () => {};
+
             const speak = () => {
+                const voice = mappings[voices.value];
+
+                if (!voice) {
+                    console.warn(`No voice found for: ${voices.value}`)
+                }
+
                 const speaker = tts.createSpeaker({
-                    voice: "Google US English",
-                    lang: "en-US",
+                    voice: voice.name,
+                    lang: voice.lang,
                     volume: 1,
                     pitch: 1,
                     rate: 1
@@ -17,7 +66,10 @@
                 speaker.speak("Hello! This is text to speech").then(() => {
                     console.log("The speaker has spoken!");
                 }).catch((err) => {
-                    console.warn(`An error has occurred: ${err}`);
+                    console.warn(`An error has occurred:`);
+
+                    console.log(err);
+
                     console.log("Sigh...the speaker did not speak :(");
                 });
             };
@@ -25,20 +77,28 @@
             const button = document.getElementById("activate");
 
             button.onclick = speak;
+            button.disabled = true;
 
-            console.log("READY!");
-            console.log(window.speechSynthesis.getVoices());
+            voices.onchange = () => {
+                const selected = voices.value;
 
-            window.speechSynthesis.onvoiceschanged = () => {};
+                button.disabled = !mappings[selected];
+            };
         }
     </script>
 </head>
 <body>
     <h1>Voice Test</h1>
-    <button id="activate">Push!</button>
+    <div id="voice-container">
+        <select id="voices">
+            <option disabled selected value="">Select Voice...</option>
+        </select>
+    </div>
 
-    <hr style="margin-top: 1em">
+    <button id="activate">Speak!</button>
 
-    <a href="https://github.com/gfyoung/basic-tts/blob/master/demo.html" style="color: black; text-decoration: none"><strong>&#128073; Source Code</strong></a>
+    <hr>
+
+    <span>&#128073;</span><a href="https://github.com/gfyoung/basic-tts/blob/master/demo.html"><strong>Source Code</strong></a>
 </body>
 </html>
