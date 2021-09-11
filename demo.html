@@ -23,10 +23,12 @@
             };
 
             const button = document.getElementById("activate");
+
             button.onclick = speak;
 
             console.log("READY!");
             console.log(window.speechSynthesis.getVoices());
+
             window.speechSynthesis.onvoiceschanged = () => {};
         }
     </script>
@@ -34,5 +36,9 @@
 <body>
     <h1>Voice Test</h1>
     <button id="activate">Push!</button>
+
+    <hr style="margin-top: 1em">
+
+    <a href="https://github.com/gfyoung/basic-tts/blob/master/demo.html" style="color: black; text-decoration: none"><strong>&#128073; Source Code</strong></a>
 </body>
 </html>

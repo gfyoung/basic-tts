@@ -20,6 +20,6 @@ const tts = require("basic-tts");
 console.log(tts.isSupported());
 ```
 
-The repository also contains a demo HTML file ([demo.html](https://github.com/gfyoung/basic-tts/blob/master/demo.html)) where you can also
+The repository also contains a demo HTML file ([demo.html](https://gfyoung.github.io/basic-tts/demo.html)) where you can also
 see whether your browser supports text-to-speech. If it does, you can then see
 the package in action.
