@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+
+jobs:
+  unit:
+    name: Unit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "node"
+      - run: npm install
+        name: Install Dependencies
+      - run: npm test
+        name: Run Tests
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "node"
+      - run: npm install
+        name: Install Dependencies
+      - run: npm run lint
+        name: Run Lint
+
+  audit:
+    name: Audit
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "node"
+      - run: npm install
+        name: Install Dependencies
+      - run: npm audit
+        name: Run Audit
+
+  outdated:
+    name: Outdated
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: "node"
+      - run: npm install
+        name: Install Dependencies
+      - run: npm outdated
+        name: Check Outdated
