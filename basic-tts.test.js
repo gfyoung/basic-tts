@@ -194,6 +194,43 @@ describe("checkVoices", () => {
             utils.checkCheckVoices(done, 1, data);
         });
     });
+
+    describe("normalizes attempts when", () => {
+        const data = [1, 2];
+
+        test("attempts is a numeric string", (done) => {
+            tts.enableTesting(utils.getMockWindowWithAttempts(2, data));
+
+            tts.checkVoices("2").then((result) => {
+                expect(result.voices).toEqual(data);
+                done();
+            }).catch((err) => {
+                done(new Error(`Unexpected error: ${JSON.stringify(err)}`));
+            });
+        });
+
+        test("attempts is a non-numeric string (resets to valid default)", (done) => {
+            tts.enableTesting(utils.getMockWindowWithAttempts(0, data));
+
+            tts.checkVoices("abc").then((result) => {
+                expect(result.voices).toEqual(data);
+                done();
+            }).catch((err) => {
+                done(new Error(`Unexpected error: ${JSON.stringify(err)}`));
+            });
+        });
+
+        test("attempts is negative (resets to valid default)", (done) => {
+            tts.enableTesting(utils.getMockWindowWithAttempts(0, data));
+
+            tts.checkVoices(-1).then((result) => {
+                expect(result.voices).toEqual(data);
+                done();
+            }).catch((err) => {
+                done(new Error(`Unexpected error: ${JSON.stringify(err)}`));
+            });
+        });
+    });
 });
 
 describe("createSpeaker", () => {
@@ -323,6 +360,17 @@ describe("speakText", () => {
             expectSpeakToFail(speaker, text, expected, done);
         });
 
+        test("voice is invalid", (done) => {
+            tts.enableTesting(utils.getMockWindowWithVoices(...names));
+
+            const speaker = tts.createSpeaker({voice: "baz"});
+            const expected = {
+                msg: "Speech could not be initialized due to invalid voice"
+            };
+
+            expectSpeakToFail(speaker, text, expected, done);
+        });
+
         test("speaking produced unknown error", (done) => {
             const mockWindow = utils.getMockWindowWithVoices(...names);
             mockWindow.speechSynthesis.speak = (utterance) => {
@@ -359,5 +407,57 @@ describe("speakText", () => {
         }).catch((err) => {
             done(new Error(`Unexpected error: ${JSON.stringify(err)}`));
         });
+    });
+});
+
+describe("AMD define", () => {
+    let originalDefine;
+
+    beforeEach(() => {
+        originalDefine = global.define;
+        jest.resetModules();
+    });
+
+    afterEach(() => {
+        if (originalDefine === undefined) {
+            delete global.define;
+        } else {
+            global.define = originalDefine;
+        }
+    });
+
+    test("calls define when AMD is available", () => {
+        const calls = [];
+        global.define = (...args) => { calls.push(args); };
+        global.define.amd = true;
+
+        require("./basic-tts");
+
+        expect(calls.length).toBe(2);
+        expect(calls[0][0]).toBe("basic-tts");
+        expect(calls[0][1]).toEqual([]);
+        expect(typeof calls[0][2]).toBe("function");
+        expect(calls[1][0]).toEqual([]);
+        expect(typeof calls[1][1]).toBe("function");
+    });
+
+    test("factory functions return the tts module", () => {
+        const calls = [];
+        global.define = (...args) => { calls.push(args); };
+        global.define.amd = true;
+
+        const freshTts = require("./basic-tts");
+
+        expect(calls[0][2]()).toBe(freshTts);
+        expect(calls[1][1]()).toBe(freshTts);
+    });
+
+    test("does not call define when AMD is not available", () => {
+        let called = false;
+        global.define = () => { called = true; };
+
+        require("./basic-tts");
+
+        expect(called).toBe(false);
     });
 });
